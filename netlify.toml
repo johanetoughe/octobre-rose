@@ -1,0 +1,103 @@
+# Netlify configuration for Octobre Rose App
+# Documentation: https://docs.netlify.com/configure-builds/file-based-configuration/
+
+[build]
+  # Commande de build pour Vite
+  command = "npm run build"
+  
+  # Dossier contenant les fichiers générés après le build
+  publish = "dist"
+  
+  # Commande pour les dépendances (optionnel, npm install est utilisé par défaut)
+  # npm ci est plus recommandé en production
+  # functions = "netlify/functions"
+
+[build.environment]
+  # Node version
+  NODE_VERSION = "18.17.0"
+  
+  # Garantir que npm install utilise le package-lock.json
+  NPM_FLAGS = "--legacy-peer-deps"
+
+# Configuration des variables d'environnement
+# IMPORTANT: Ne pas commiter les vraies clés ici
+# Les vraies valeurs doivent être définies dans le dashboard Netlify
+[[env.production.context]]
+  environment = { VITE_SUPABASE_URL = "https://oqdnbdfeluhgbatszucp.supabase.co", VITE_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9xZG5iZGZlbHVoZ2JhdHN6dWNwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA1Mjc2MTMsImV4cCI6MjA3NjEwMzYxM30.eVCdV6Euh3bTfFHCh2NJ7JyQ5dAJbopKzfXJW9v_19U" }
+
+# Redirects - IMPORTANT pour les SPA (Single Page Application)
+# Tous les chemins non trouvés redirigent vers index.html
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# En-têtes de sécurité par défaut
+[[headers]]
+  for = "/*"
+  [headers.values]
+    # Sécurité
+    X-Frame-Options = "SAMEORIGIN"
+    X-Content-Type-Options = "nosniff"
+    X-XSS-Protection = "1; mode=block"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    
+    # CORS (si vous avez besoin d'appels cross-origin)
+    # Access-Control-Allow-Origin = "*"
+    # Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
+    # Access-Control-Allow-Headers = "Content-Type, Authorization"
+    
+    # Cache pour les assets statiques
+    # Sera overridé pour certains fichiers ci-dessous
+
+# Cache pour les fichiers JavaScript et CSS (long terme)
+[[headers]]
+  for = "/*.(js|css)"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Cache pour HTML (court terme pour permettre les mises à jour)
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+
+# Cache pour les assets (images, fonts, etc.)
+[[headers]]
+  for = "/*.(png|jpg|jpeg|gif|svg|woff|woff2|ttf|eot)"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Gestion des erreurs personnalisées
+[[redirects]]
+  from = "/404"
+  to = "/index.html"
+  status = 404
+
+# Performance - minification et compression
+[build.processing]
+  skip_processing = false
+
+[build.processing.css]
+  bundle = true
+  minify = true
+
+[build.processing.js]
+  bundle = true
+  minify = true
+
+[build.processing.html]
+  pretty_urls = true
+
+# Logs et notifications (optionnel)
+[context.production]
+  command = "npm run build"
+  publish = "dist"
+
+[context.deploy-preview]
+  command = "npm run build"
+  publish = "dist"
+
+[context.branch-deploy]
+  command = "npm run build"
+  publish = "dist"
